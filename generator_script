@@ -1,0 +1,24 @@
+import requests, os, bs4, csv, re
+from pathlib import Path
+
+Hnbs_output = open('output.csv', 'w' ,newline = '')
+outputDictWriter = csv.DictWriter(Hnbs_output, ['Case', 'Image_prompt', 'Image_discussion'])
+outputDictWriter.writeheader()
+
+url = r"C:/Users/Minty/Downloads/Radiology/Radiology/HNBS/HNBS/headneckbrainspine.com/Case-1.html"
+soup = bs4.BeautifulSoup(open(url, encoding="utf8"), "html.parser")
+
+question_regex = re.compile(r'\d\.html$')
+question_regex.search(url)
+
+q_prompt = True
+q_num = 1
+
+while not url.endswith('Case-424-discussion.html'):
+    for n in  soup.find_all('img'):
+        if n.get('src').startswith('images/case'):
+            pathlistq = []
+            pathlistq += [n.get('src')]
+            print (pathlistq)
+        else:
+            n.get('src').startswith('images/case'):
