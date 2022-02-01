@@ -1,24 +1,30 @@
 import requests, os, bs4, csv, re
 from pathlib import Path
 
+# CSV file for Anki import
 Hnbs_output = open('output.csv', 'w' ,newline = '')
 outputDictWriter = csv.DictWriter(Hnbs_output, ['Case', 'Image_prompt', 'Image_discussion'])
 outputDictWriter.writeheader()
 
+# Local file to load in bs4
 url = r"C:/Users/Minty/Downloads/Radiology/Radiology/HNBS/HNBS/headneckbrainspine.com/Case-1.html"
 soup = bs4.BeautifulSoup(open(url, encoding="utf8"), "html.parser")
 
+# Regex to determine if question or answer page
 question_regex = re.compile(r'\d\.html$')
 question_regex.search(url)
 
+# Could also just switch between prompt and question as these alternate
 q_prompt = True
 q_num = 1
 
+# Main loop; while not last answer set finds relevant images 
+# Still need to append to CSV file 
 while not url.endswith('Case-424-discussion.html'):
+    soup = bs4.BeautifulSoup(open(url, encoding="utf8"), "html.parser")
     for n in  soup.find_all('img'):
         if n.get('src').startswith('images/case'):
-            pathlistq = []
-            pathlistq += [n.get('src')]
-            print (pathlistq)
-        else:
-            n.get('src').startswith('images/case'):
+            print (n.get('src'))
+
+    next_link = soup.select('a[title]')[-1]
+    url = r'C:/Users/Minty/Downloads/Radiology/Radiology/HNBS/HNBS/headneckbrainspine.com/' + next_link.get('href')
