@@ -14,10 +14,10 @@ for i in range (424):
 url = r"C:/Users/Minty/Downloads/Radiology/Radiology/HNBS/HNBS/headneckbrainspine.com/Case-1.html"
 soup = bs4.BeautifulSoup(open(url, encoding="utf8"), "html.parser")
 
-# Regex to determine if question or answer page
-
+# Regex to determine if question number
 regex_number = re.compile(r'\d+')
 
+# Define if images relate to question stems or answers
 def a_prompt(str):
     if str.endswith('Discussion.html') or str.endswith('discussion.html'):
         return True
@@ -25,8 +25,9 @@ def a_prompt(str):
         return False
 
 
-# Main loop; while not last answer set finds relevant images 
-# Still need to append to CSV file 
+# Main loop; while not last discussion finds relevant images 
+# Append image path to dataframe at desired row and column 
+
 while not url.endswith('Case-424-discussion.html'):
     soup = bs4.BeautifulSoup(open(url, encoding="utf8"), "html.parser")
     for n in  soup.find_all('img'):
