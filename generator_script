@@ -1,22 +1,29 @@
 import requests, os, bs4, csv, re
+import pandas as pd
 from pathlib import Path
 
 # CSV file for Anki import
-Hnbs_output = open('output.csv', 'w' ,newline = '')
-outputDictWriter = csv.DictWriter(Hnbs_output, ['Case', 'Image_prompt', 'Image_discussion'])
-outputDictWriter.writeheader()
+Hnbs_output = {'Case Number': [''], 'Question Promt': [''], 'Answer Slide': ['']}
+df = pd.DataFrame(Hnbs_output)
+df.head()
+
+for i in range (424):
+    df.loc[df.shape[0]] = ['', '', '']
 
 # Local file to load in bs4
 url = r"C:/Users/Minty/Downloads/Radiology/Radiology/HNBS/HNBS/headneckbrainspine.com/Case-1.html"
 soup = bs4.BeautifulSoup(open(url, encoding="utf8"), "html.parser")
 
 # Regex to determine if question or answer page
-question_regex = re.compile(r'\d\.html$')
-question_regex.search(url)
 
-# Could also just switch between prompt and question as these alternate
-q_prompt = True
-q_num = 1
+regex_number = re.compile(r'\d+')
+
+def a_prompt(str):
+    if str.endswith('Discussion.html') or str.endswith('discussion.html'):
+        return True
+    else:
+        return False
+
 
 # Main loop; while not last answer set finds relevant images 
 # Still need to append to CSV file 
@@ -24,7 +31,17 @@ while not url.endswith('Case-424-discussion.html'):
     soup = bs4.BeautifulSoup(open(url, encoding="utf8"), "html.parser")
     for n in  soup.find_all('img'):
         if n.get('src').startswith('images/case'):
-            print (n.get('src'))
-
+            q_num = regex_number.search(url).group()
+            if a_prompt(url) == False:
+                df.loc[int(q_num)][1] += str(r"""<img src='""") + str(n.get('src'))[7:] + str(r"""'/>""")
+                print (df.loc[int(q_num)][1])
+            else:
+                df.loc[int(q_num)][2] += str(r"""<img src='""") + str(n.get('src'))[7:] + str(r"""'/>""")
+                print (df.loc[int(q_num)][2] )
+            df.loc[int(q_num)][0] = url
     next_link = soup.select('a[title]')[-1]
     url = r'C:/Users/Minty/Downloads/Radiology/Radiology/HNBS/HNBS/headneckbrainspine.com/' + next_link.get('href')
+
+    df.to_csv(r'HNBS.csv')
+
+
